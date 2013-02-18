@@ -3,26 +3,17 @@ require 'net/http/server/requests'
 require 'net/http/server/responses'
 require 'net/http/server/stream'
 require 'net/http/server/chunked_stream'
+require 'net/http/server/ssl_server'
 
 require 'net/protocol'
-require 'gserver'
 
 module Net
   class HTTP < Protocol
     module Server
-      class Daemon < GServer
+      class Daemon < SslServer
 
         include Requests
         include Responses
-
-        # Default host to bind to.
-        DEFAULT_HOST = '0.0.0.0'
-
-        # Default port to listen on.
-        DEFAULT_PORT = 8080
-
-        # Maximum number of simultaneous connections.
-        MAX_CONNECTIONS = 256
 
         # Creates a new HTTP Daemon.
         #
@@ -54,12 +45,7 @@ module Net
         #   The TCP socket of the client.
         #
         def initialize(options={},&block)
-          host = options.fetch(:host,DEFAULT_HOST)
-          port = options.fetch(:port,DEFAULT_PORT).to_i
-          max_connections = options.fetch(:max_connections,MAX_CONNECTIONS)
-          log = options.fetch(:log,$stderr)
-
-          super(port,host,max_connections,log,false,true)
+          super(options)
 
           handler(options[:handler],&block)
         end
